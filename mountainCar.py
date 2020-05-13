@@ -5,10 +5,14 @@ env = gym.make("MountainCar-v0")
 env.reset()
 
 # Hyperparameters
-LR = 0.1    # Learning rate
-DISC = 0.95 # Discount
-EPS = 25000 # Episodes
+LR = 0.1        # Learning rate
+DISC = 0.95     # Discount
+EPS = 25000     # Episodes
+EPSIL = 0.5     # Epsilon
 
+START_EPSIL_DECAY = 1
+END_EPSIL_DECAY = EPS // 2
+EPSIL_DECAY_VAL = EPSIL / (END_EPSIL_DECAY - START_EPSIL_DECAY)
 SHOW_EVERY = 2000
 
 obsHigh = env.observation_space.high
@@ -32,11 +36,14 @@ for episode in range(EPS):
         render = True
     else:
         render = False
-    print(f"Episode {episode}")
+    #print(f"Episode {episode}")
     discreetState = getDiscreetState(env.reset())
     done = False
     while not done:
-        action = np.argmax(qTable[discreetState])
+        if np.random.random() > EPSIL:
+            action = np.argmax(qTable[discreetState])
+        else:
+            action = np.random.randint(0, obsN)
         new_state, reward, done, _ = env.step(action)
         newDiscreetState = getDiscreetState(new_state)
         if render:
@@ -51,6 +58,8 @@ for episode in range(EPS):
             qTable[discreetState + (action, )] = 0
 
         discreetState = newDiscreetState
+    if END_EPSIL_DECAY >= episode >= START_EPSIL_DECAY:
+        EPSIL -= EPSIL_DECAY_VAL
 
 
 env.close()
