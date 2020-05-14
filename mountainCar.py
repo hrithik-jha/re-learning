@@ -25,39 +25,41 @@ discreteWinSize = (obsHigh - obsLow) / discreteSize
 
 qTable = np.random.uniform(low=-2, high=0, size=(discreteSize + [obsN]))
 
-# Helper for constinuous -> discreet states
-def getDiscreetState(state):
-    discreetState = (state - obsLow) / discreteWinSize
-    return tuple(discreetState.astype(np.int))
+# Helper for constinuous -> discrete states
+def getDiscreteState(state):
+    discreteState = (state - obsLow) / discreteWinSize
+    return tuple(discreteState.astype(np.int))
 
-
+# Training over a bunch of episodes
 for episode in range(EPS):
     if episode % SHOW_EVERY == 0:
         render = True
     else:
         render = False
     #print(f"Episode {episode}")
-    discreetState = getDiscreetState(env.reset())
+    discreteState = getDiscreteState(env.reset())
     done = False
     while not done:
+        # See if random threshold justifies exploration
         if np.random.random() > EPSIL:
-            action = np.argmax(qTable[discreetState])
+            action = np.argmax(qTable[discreteState])
         else:
             action = np.random.randint(0, obsN)
         new_state, reward, done, _ = env.step(action)
-        newDiscreetState = getDiscreetState(new_state)
+        newDiscreteState = getDiscreteState(new_state)
         if render:
             env.render()
+        # Q-Table equation
         if not done:
-            maxQ = np.max(qTable[newDiscreetState])
-            currQ = qTable[discreetState + (action, )]
+            maxQ = np.max(qTable[newDiscreteState])
+            currQ = qTable[discreteState + (action, )]
             newQ = (1- LR) * currQ + LR * (reward + DISC * maxQ)
-            qTable[discreetState + (action, )] = newQ
+            qTable[discreteState + (action, )] = newQ
         elif new_state[0] >= env.goal_position:
-            print(f"Goal reached by {episode}")
-            qTable[discreetState + (action, )] = 0
+            print(f"Goal reached at {episode}")
+            qTable[discreteState + (action, )] = 0
 
-        discreetState = newDiscreetState
+        discreteState = newDiscreteState
     if END_EPSIL_DECAY >= episode >= START_EPSIL_DECAY:
         EPSIL -= EPSIL_DECAY_VAL
 
