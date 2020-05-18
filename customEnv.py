@@ -55,7 +55,7 @@ class Blob:
             self.move(x=-1, y=1)
         elif choice == 3:
             self.move(x=1, y=-1)
-        
+
 
     def move(self, x=False, y=False):
         # Randomized or deterministic movements
@@ -87,7 +87,7 @@ if start_q_table is None:
         for y1 in range(-SIZE+1, SIZE):
             for x2 in range(-SIZE+1, SIZE):
                 for y2 in range(-SIZE+1, SIZE):
-                    q_table[((x1, x2), (x2, y2))] = [np.random.uniform(-5, 0) for i in range(4)]
+                    q_table[((x1, y1), (x2, y2))] = [np.random.uniform(-5, 0) for i in range(4)]
 else:
     # opening a pre trained Q Table
     with open(start_q_table, "rb") as f:
@@ -153,10 +153,10 @@ for episode in range(HM_EPISODES):
             # Showing environment
             if reward == FOOD_REWARD or reward == -ENEMY_PENALTY:
                 # uno momento bruh
-                if cv2.waitKey(500) & 0xFF == ord("q")
+                if cv2.waitKey(500) & 0xFF == ord('q'):
                     break
             else:
-                if cv2.waitKey(3) & 0xFF == ord("q")
+                if cv2.waitKey(3) & 0xFF == ord('q'):
                     break
 
         episode_reward += reward
@@ -164,13 +164,13 @@ for episode in range(HM_EPISODES):
             break
 
     # epsilon decay for changing randomness
-    epsilon_rewards.append(episode)
+    episode_rewards.append(episode)
     epsilon *= EPS_DECAY
 
 # Logging and plotting results
 moving_avg = np.convolve(episode_rewards, np.ones((SHOW_EVERY,)) / SHOW_EVERY, mode="valid")
 plt.plot([i for i in range(len(moving_avg))], moving_avg)
-plt.ylabel(f"Reward {SHOW_EVERY}ma")
+plt.ylabel(f"Reward {SHOW_EVERY}")
 plt.xlabel("Episode #")
 plt.show()
 
