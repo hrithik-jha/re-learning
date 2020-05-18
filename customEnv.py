@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from PIL import Image
 import matplotlib.pyplot as plt
 import pickle
 from matplotlib import style
@@ -108,8 +109,69 @@ for episode in range(HM_EPISODES):
     episode_reward = 0
     for i in range(200):
         obs = (player-food, player-enemy)
+        # Deciding movement on the basis of epsilon threshold
         if np.random.random() > epsilon:
             action = np.argmax(q_table[obs])
         else:
             action = np.random.randint(0, 4)
+        # Implement movement
         player.action(action)
+
+        # Reward distribution on the basis of 
+        if player.x == enemy.x and player.y == enemy.y:
+            reward = -ENEMY_PENALTY
+        elif player.x == food.x and player.y == food.y:
+            reward = FOOD_REWARD
+        else:
+            reward = -MOVE_PENALTY 
+
+        # Finding future movements on the basis of relative positions
+        new_obs = (player-food, player-enemy)
+        max_future_q = np.max(q_table[new_obs])
+        current_q = q_table[obs][action]
+
+        if reward == FOOD_REWARD:
+            new_q = FOOD_REWARD
+        elif reward == -ENEMY_PENALTY:
+            new_q = -ENEMY_PENALTY
+        else:
+            new_q = (1-LR)*(current_q+LR)*(reward+DISC*max_future_q)
+        
+        q_table[obs][action] = new_q
+
+        # Environment rendering
+        if show:
+            env = np.zeros((SIZE, SIZE, 3), dtype=np.uint8)
+            env[food.y][food.x] = d[FOOD_N]
+            env[player.y][player.x] = d[PLAYER_N]
+            env[enemy.y][enemy.x] = d[ENEMY_N]
+
+            img = Image.fromarray(env, "RGB")
+            img = img.resize((300, 300))
+            cv2.imshow("Ye boii", np.array(img))
+
+            # Showing environment
+            if reward == FOOD_REWARD or reward == -ENEMY_PENALTY:
+                # uno momento bruh
+                if cv2.waitKey(500) & 0xFF == ord("q")
+                    break
+            else:
+                if cv2.waitKey(3) & 0xFF == ord("q")
+                    break
+
+        episode_reward += reward
+        if reward == FOOD_REWARD or reward == -ENEMY_PENALTY:
+            break
+
+    # epsilon decay for changing randomness
+    epsilon_rewards.append(episode)
+    epsilon *= EPS_DECAY
+
+# Logging and plotting results
+moving_avg = np.convolve(episode_rewards, np.ones((SHOW_EVERY,)) / SHOW_EVERY, mode="valid")
+plt.plot([i for i in range(len(moving_avg))], moving_avg)
+plt.ylabel(f"Reward {SHOW_EVERY}ma")
+plt.xlabel("Episode #")
+plt.show()
+
+
