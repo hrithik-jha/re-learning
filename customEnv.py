@@ -135,7 +135,7 @@ for episode in range(HM_EPISODES):
         elif reward == -ENEMY_PENALTY:
             new_q = -ENEMY_PENALTY
         else:
-            new_q = (1-LR)*(current_q+LR)*(reward+DISC*max_future_q)
+            new_q = (1-LR)*current_q + LR*(reward+DISC*max_future_q)
         
         q_table[obs][action] = new_q
 
