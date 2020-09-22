@@ -163,7 +163,7 @@ for episode in range(HM_EPISODES):
         if reward == FOOD_REWARD or reward == -ENEMY_PENALTY:
             break
 
-    # epsilon decay for changing randomness
+    # Epsilon decay for changing randomness
     episode_rewards.append(episode)
     epsilon *= EPS_DECAY
 
