@@ -19,7 +19,7 @@ obsHigh = env.observation_space.high
 obsLow = env.observation_space.low
 obsN = env.action_space.n
 
-# Choosing a value - 20 for discrete actions
+# Choosing a value from 20 for discrete actions
 discreteSize = [20] * len(obsHigh)
 discreteWinSize = (obsHigh - obsLow) / discreteSize
 
